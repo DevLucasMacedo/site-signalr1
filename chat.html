@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Client</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.js"></script>
+    <script>
+
+      const connection = new signalR.HubConnectionBuilder()
+        .withUrl("https://localhost:7023")
+        .configureLogging(signalR.LogLevel.Information)
+        .withAutomaticReconnect()
+        .build();
+      
+      function startConnection() {
+        connection.on("ReceiveMessage", (user, message) => onReceiveMessage(user, message));
+        connection.start();
+      }
+
+      function sendMessage() {
+        try {
+            const user = document.getElementById("userInput").value;
+            const message = document.getElementById("messageInput").value;
+
+            connection.invoke("SendMessage", user, message);
+        } catch (err) {
+            console.error(err);
+        }
+      }
+
+      function onReceiveMessage(user, message) {
+
+        const li = document.createElement("li");
+        li.textContent = `${user}: ${message}`;
+        document.getElementById("messageList").appendChild(li);
+      }
+
+    </script>
+</head>
+<body onload="startConnection()">
+    <h1>Chat Client</h1>
+    <input type="text" id="userInput" placeholder="User" />
+    <input type="text" id="messageInput" placeholder="Message" />
+    <button onclick="sendMessage()">Send</button>
+    <hr />
+    <div id="messageList"></div>
+</body>
+
+</html>
